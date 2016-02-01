@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS  = -O0
 
-all: rdtsc.c
+all: rdtsc2.c
 	$(CC) $(CFLAGS) -o rdtsc rdtsc2.c
 
 clean:
