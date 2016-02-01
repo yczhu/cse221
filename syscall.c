@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     int i;
     start = tick();
     for(i=0; i < loops; i++) {
-        getpid();
+        getppid();
     }
     end = tick();
     printf("argv: %d, overhead: %f\n", loops, (double)(end- start) / (double)loops);
