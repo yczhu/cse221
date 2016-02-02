@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     double sum = 0;
 
     // filter first time
-    for (i = 1; i < loops+2; i++) {
+    for (i = 1; i < loops+1; i++) {
         sum += times[i];
         printf("Loop %d: overhead = %" PRIu64 " cycles\n", i, times[i]);
     }
