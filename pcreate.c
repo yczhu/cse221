@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
             "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
             "%rbx", "%rcx", "%rdx");
 
-    for(i = 0; i < loops; i++) {
+   // for(i = 0; i < loops; i++) {
         asm volatile ("CPUID\n\t"
                 "RDTSC\n\t"
                 "mov %%edx, %0\n\t"
@@ -72,8 +72,8 @@ int main(int argc, char* argv[])
                  "%rbx", "%rcx", "%rdx");
           end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
           printf ("%" PRIu64 " cycles\n",end - start);
-        }else wait(NULL);
+        }
 
-    }
+   // }
     return 0;
 }

@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
             "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
             "%rbx", "%rcx", "%rdx");
 
-    for(i = 0; i < loops; i++) { 
+//    for(i = 0; i < loops; i++) { 
         pthread_t t;
         asm volatile ("CPUID\n\t"
                 "RDTSC\n\t"
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         start = (((uint64_t)cycles_high << 32)| cycles_low );
         pthread_create (&t,(pthread_attr_t *) NULL,runner,&start);
         pthread_join(t,NULL);
-    }
+//    }
 
     return 0;
 }
