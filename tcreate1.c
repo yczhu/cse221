@@ -2,12 +2,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <pthread.h>
 
 static inline unsigned long long tick() 
 {
     unsigned a, d;
     __asm__ __volatile__("rdtsc": "=a" (a), "=d" (d) );
     return (((unsigned long long)a) | (((unsigned long long)d) << 32));
+}
+
+void * runner (){
 }
 
 int main(int argc, char* argv[])
@@ -25,10 +29,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    uint64_t start, end;
-    unsigned cycles_low, cycles_high, cycles_low1, cycles_high1;
     uint64_t *times;
-
+    unsigned cycles_low, cycles_high, cycles_low1, cycles_high1;
+    uint64_t start,end;
     times = malloc(loops * sizeof(uint64_t*));
 
     // Warm up the system
@@ -54,78 +57,47 @@ int main(int argc, char* argv[])
             "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
             "%rbx", "%rcx", "%rdx");
 
-
-    // test without loop
-            asm volatile ("CPUID\n\t"
-                "RDTSC\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
-                "%rax", "%rbx", "%rcx", "%rdx");
-
-    getppid();
-
-            asm volatile("RDTSCP\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t"
-                "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
-                "%rbx", "%rcx", "%rdx");
-
-        start = (((uint64_t)cycles_high << 32)| cycles_low );
-        end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-        times[0] =end - start;
-
-    // test without loop x2
-
-                asm volatile ("CPUID\n\t"
-                "RDTSC\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
-                "%rax", "%rbx", "%rcx", "%rdx");
-
-    getppid();
-
-            asm volatile("RDTSCP\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t"
-                "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
-                "%rbx", "%rcx", "%rdx");
-
-        start = (((uint64_t)cycles_high << 32)| cycles_low );
-        end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-        times[1] =end - start;
-
-    // loop
-
-    for(i = 2; i < loops+2; i++) {
+    for(i = 0; i < loops; i++) { 
+        pthread_t t;
         asm volatile ("CPUID\n\t"
                 "RDTSC\n\t"
                 "mov %%edx, %0\n\t"
                 "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
                 "%rax", "%rbx", "%rcx", "%rdx");
-
-        // Call the function to measure here
-        getppid();
-
+        pthread_create (&t,(pthread_attr_t *) NULL,runner,NULL);
+        pthread_join(t,NULL);
         asm volatile("RDTSCP\n\t"
                 "mov %%edx, %0\n\t"
                 "mov %%eax, %1\n\t"
                 "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
                 "%rbx", "%rcx", "%rdx");
-
         start = (((uint64_t)cycles_high << 32)| cycles_low );
         end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
         times[i] =end - start;
     }
 
     double sum = 0;
-
-    // filter first time
-    for (i = 1; i < loops+1; i++) {
+    for (i = 0; i < loops; i++) {
         sum += times[i];
         printf("Loop %d: overhead = %" PRIu64 " cycles\n", i, times[i]);
     }
 
     printf("The average overhead is: %f cycles\n", sum / loops);
 
+/*    asm volatile ("CPUID\n\t"
+            "RDTSC\n\t"
+            "mov %%edx, %0\n\t"
+            "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
+            "%rax", "%rbx", "%rcx", "%rdx");
+    sleep(10);
+    asm volatile("RDTSCP\n\t"
+            "mov %%edx, %0\n\t"
+            "mov %%eax, %1\n\t"
+            "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
+            "%rbx", "%rcx", "%rdx");
+    start = (((uint64_t)cycles_high << 32)| cycles_low );
+    end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
+    printf("The 10s sleep is %" PRIu64 " cycles\n", (end - start));
+*/
     return 0;
 }

@@ -54,63 +54,20 @@ int main(int argc, char* argv[])
             "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
             "%rbx", "%rcx", "%rdx");
 
-
-    // test without loop
-            asm volatile ("CPUID\n\t"
-                "RDTSC\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
-                "%rax", "%rbx", "%rcx", "%rdx");
-
-    getppid();
-
-            asm volatile("RDTSCP\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t"
-                "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
-                "%rbx", "%rcx", "%rdx");
-
-        start = (((uint64_t)cycles_high << 32)| cycles_low );
-        end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-        times[0] =end - start;
-
-    // test without loop x2
-
-                asm volatile ("CPUID\n\t"
-                "RDTSC\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
-                "%rax", "%rbx", "%rcx", "%rdx");
-
-    getppid();
-
-            asm volatile("RDTSCP\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t"
-                "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
-                "%rbx", "%rcx", "%rdx");
-
-        start = (((uint64_t)cycles_high << 32)| cycles_low );
-        end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-        times[1] =end - start;
-
-    // loop
-
-    for(i = 2; i < loops+2; i++) {
+    for(i = 0; i < loops; i++) {
         asm volatile ("CPUID\n\t"
                 "RDTSC\n\t"
                 "mov %%edx, %0\n\t"
                 "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
                 "%rax", "%rbx", "%rcx", "%rdx");
 
-        // Call the function to measure here
-        getppid();
-
+        pid_t p=fork();
+        if (p==0) exit(0);
         asm volatile("RDTSCP\n\t"
-                "mov %%edx, %0\n\t"
-                "mov %%eax, %1\n\t"
-                "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
-                "%rbx", "%rcx", "%rdx");
+               "mov %%edx, %0\n\t"
+               "mov %%eax, %1\n\t"
+               "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
+               "%rbx", "%rcx", "%rdx");
 
         start = (((uint64_t)cycles_high << 32)| cycles_low );
         end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
@@ -118,14 +75,27 @@ int main(int argc, char* argv[])
     }
 
     double sum = 0;
-
-    // filter first time
-    for (i = 1; i < loops+1; i++) {
+    for (i = 0; i < loops; i++) {
         sum += times[i];
         printf("Loop %d: overhead = %" PRIu64 " cycles\n", i, times[i]);
     }
 
     printf("The average overhead is: %f cycles\n", sum / loops);
 
+/*    asm volatile ("CPUID\n\t"
+            "RDTSC\n\t"
+            "mov %%edx, %0\n\t"
+            "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
+            "%rax", "%rbx", "%rcx", "%rdx");
+    sleep(10);
+    asm volatile("RDTSCP\n\t"
+            "mov %%edx, %0\n\t"
+            "mov %%eax, %1\n\t"
+            "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
+            "%rbx", "%rcx", "%rdx");
+    start = (((uint64_t)cycles_high << 32)| cycles_low );
+    end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
+    printf("The 10s sleep is %" PRIu64 " cycles\n", (end - start));
+*/
     return 0;
 }
