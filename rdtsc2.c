@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
     double sum = 0;
     for (i = 0; i < loops; i++) {
-        printf(PRIu64"\n",times[i]);
+        printf("%"PRIu64"\n",times[i]);
     }
 
     //printf("The average overhead is: %f cycles\n", sum / loops);

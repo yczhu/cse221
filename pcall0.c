@@ -87,11 +87,10 @@ int main(int argc, char* argv[])
 
     double sum = 0;
     for (i = 0; i < loops; i++) {
-        sum += times[i];
-        printf("Loop %d: overhead = %" PRIu64 " cycles\n", i, times[i]);
+        printf("%" PRIu64 "\n", times[i]);
     }
 
-    printf("The average overhead is: %f cycles\n", sum / loops);
+//    printf("The average overhead is: %f cycles\n", sum / loops);
 
     return 0;
 }
