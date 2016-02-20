@@ -60,7 +60,6 @@ int main(int argc, char* argv[])
                 "mov %%edx, %0\n\t"
                 "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
                 "%rax", "%rbx", "%rcx", "%rdx");
-
         // Call the function to measure here
         asm volatile("RDTSCP\n\t"
                 "mov %%edx, %0\n\t"
@@ -75,13 +74,12 @@ int main(int argc, char* argv[])
 
     double sum = 0;
     for (i = 0; i < loops; i++) {
-        sum += times[i];
-        printf("Loop %d: overhead = %" PRIu64 " cycles\n", i, times[i]);
+        printf(PRIu64"\n",times[i]);
     }
 
-    printf("The average overhead is: %f cycles\n", sum / loops);
+    //printf("The average overhead is: %f cycles\n", sum / loops);
 
-    asm volatile ("CPUID\n\t"
+   /* asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
             "mov %%edx, %0\n\t"
             "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
@@ -111,6 +109,6 @@ int main(int argc, char* argv[])
     start = (((uint64_t)cycles_high << 32)| cycles_low );
     end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
     printf("The loop overhead is %f cycles\n", (double) (end - start)/loops);
-
+*/
     return 0;
 }
