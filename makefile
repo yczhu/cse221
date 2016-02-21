@@ -17,5 +17,6 @@ all: rdtsc2.c pcall0.c pcall1.c pcall2.c pcall3.c pcall4.c pcall5.c pcall6.c pca
 	$(CC) $(CFLAGS) -o tcreate tcreate.c
 	$(CC) $(CFLAGS) -o pthread_context_switch pthread_context_switch.c
 	$(CC) $(CFLAGS) -o syscall syscall.c
+	$(CC) $(CFLAGS) -funroll-loops -o mem_latency mem_latency.c
 clean:
-	$(RM) rdtsc proc0 proc1 proc2 proc3 proc4 proc5 proc6 proc7 loop context_switch pcreate tcreate syscall pthread_context_switch
+	$(RM) rdtsc proc0 proc1 proc2 proc3 proc4 proc5 proc6 proc7 loop context_switch pcreate tcreate syscall pthread_context_switch mem_latency
