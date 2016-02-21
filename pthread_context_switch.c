@@ -9,14 +9,17 @@ pthread_t tid;
 int test_cond = 0;
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mut2 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
 
 void write_fd(void *arg) {
+
     pthread_mutex_lock(&mut);
-    //printf("Pthread wait!\n");
-    //test_cond = 1;
-    pthread_cond_wait(&cond, &mut);
-    //printf("Pthread wait done!\n");
+    while (test_cond == 0) {
+        pthread_cond_wait(&cond2, &mut);
+    }
+    pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mut);
     pthread_exit(0);
 }
@@ -78,12 +81,14 @@ int main(int argc, char *argv[])
 
         //printf("Main ready to signal\n");
         pthread_mutex_lock(&mut);
+            test_cond = 1;
+            pthread_cond_signal(&cond2);
             asm volatile ("CPUID\n\t"
                     "RDTSC\n\t"
                     "mov %%edx, %0\n\t"
                     "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
                     "%rax", "%rbx", "%rcx", "%rdx");
-            pthread_cond_signal(&cond);
+            pthread_cond_wait(&cond, &mut);
             asm volatile("RDTSCP\n\t"
                     "mov %%edx, %0\n\t"
                     "mov %%eax, %1\n\t"
@@ -92,6 +97,8 @@ int main(int argc, char *argv[])
         pthread_mutex_unlock(&mut);
 
         //printf("Back to main!\n");
+
+        pthread_join(tid, NULL);  // Wait for thread to end
 
         start = (((uint64_t)cycles_high << 32)| cycles_low );
         end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
