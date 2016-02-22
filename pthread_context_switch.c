@@ -14,22 +14,17 @@ pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
 
 void write_fd(void *arg) {
-<<<<<<< Updated upstream
-
     pthread_mutex_lock(&mut);
     while (test_cond == 0) {
         pthread_cond_wait(&cond2, &mut);
     }
     pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mut);
-=======
+    /*
     while(c==0);
-   /* pthread_mutex_lock(&mut);
-    pthread_cond_signal(&cond);
-    pthread_mutex_unlock(&mut);*/
     d=1;
     c=0;
->>>>>>> Stashed changes
+    */
     pthread_exit(0);
 }
 
@@ -84,7 +79,6 @@ int main(int argc, char *argv[])
        // printf("Main ready to signal\n");
       // pthread_mutex_lock(&mut);
 
-<<<<<<< Updated upstream
         if (err != 0) {
             perror("Pthread creation failed!\n");
             exit(1);
@@ -94,28 +88,23 @@ int main(int argc, char *argv[])
         pthread_mutex_lock(&mut);
             test_cond = 1;
             pthread_cond_signal(&cond2);
-=======
->>>>>>> Stashed changes
+
             asm volatile ("CPUID\n\t"
                     "RDTSC\n\t"
                     "mov %%edx, %0\n\t"
                     "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
                     "%rax", "%rbx", "%rcx", "%rdx");
-<<<<<<< Updated upstream
             pthread_cond_wait(&cond, &mut);
-=======
-            c=1;
-            while (d==0);
-        //    pthread_cond_wait(&cond,&mut);
->>>>>>> Stashed changes
+            //c=1;
+            //while (d==0);
             asm volatile("RDTSCP\n\t"
                     "mov %%edx, %0\n\t"
                     "mov %%eax, %1\n\t"
                     "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
                     "%rbx", "%rcx", "%rdx");
-      //  pthread_mutex_unlock(&mut);
-          d=0;
+         // d=0;
         //printf("Back to main!\n");
+        pthread_mutex_unlock(&mut);
 
         pthread_join(tid, NULL);  // Wait for thread to end
 
