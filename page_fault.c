@@ -29,11 +29,6 @@ int main(int argc, char* argv[]) {
     char c;
 
     zero = (char*)mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, fd, 0);
-    /*
-    for (i=0; i < size / PAGE_SIZE; i++) {
-        c = zero[(i * PAGE_SIZE) % size];
-    }
-    */
     asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
             "mov %%edx, %0\n\t"
@@ -42,19 +37,23 @@ int main(int argc, char* argv[]) {
 
     /*
     for (i=0; i < TEST_PAGES; i++) {
-        c = zero[rand() % size];
+        c = zero[(i * PAGE_SIZE) % size];
     }
     */
-    c = zero[0];
-    c = zero[12098];
-    c = zero[90000];
-    c = zero[450000];
-    c = zero[500000];
-    c = zero[600000];
-    c = zero[890000];
-    c = zero[1000000];
-    c = zero[1006820];
-    c = zero[2008720];
+
+    /*
+    for (i=0; i < (2*TEST_PAGES); (i=i+2)) {
+        c = zero[i * PAGE_SIZE];
+    }
+    */
+    
+    /*
+    for (i=0; i < (32 * TEST_PAGES); (i=i+32)) {
+        c = zero[i * PAGE_SIZE];
+    }
+    */
+
+    c = zero[8000];
 
     asm volatile("RDTSCP\n\t"
             "mov %%edx, %0\n\t"
@@ -65,6 +64,7 @@ int main(int argc, char* argv[]) {
     start = (((uint64_t)cycles_high << 32)| cycles_low );
     end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
     times = end - start;
+    //times = times / TEST_PAGES;
     printf("Overhead = %" PRIu64 " cycles\n", times);
 
     //if (zero == MAP_FAILED)
