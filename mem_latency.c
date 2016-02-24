@@ -13,7 +13,9 @@ void mem_latency(unsigned long size, int stride, unsigned long iters) {
     unsigned long k;
 
     for (k = 0; k < size; k++) {
-        array[k] = (char*) &array[(k + stride + ((rand() % 10) - 10)) % size];
+        //array[k] = (char*) &array[(k + stride + ((rand() % 5) - 2)) % size];
+        array[k] = (char*) &array[(k + stride) % size];
+        //array[k] = (char*) &array[((k/stride)*stride + (rand() %stride))%size];
     }
    
     // Warm up the system
@@ -45,7 +47,7 @@ void mem_latency(unsigned long size, int stride, unsigned long iters) {
             "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
             "%rax", "%rbx", "%rcx", "%rdx");
 
-    int i;
+    unsigned long i;
     char ** p;
     p = array;
 
@@ -65,6 +67,7 @@ void mem_latency(unsigned long size, int stride, unsigned long iters) {
     start = (((uint64_t)cycles_high << 32)| cycles_low );
     end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
     times = end - start;
+    times = times / iters;
     printf("Size %lu KB: overhead = %" PRIu64 " cycles\n", size / 1024, times);
 
 }
