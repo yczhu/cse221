@@ -3,9 +3,11 @@ A RTT test on TCP server
 """
 import socket
 import time
+import sys
 
+TCP_IP = sys.argv[1]
 #TCP_IP = '127.0.0.1'
-TCP_IP = '45.55.2.40'
+#TCP_IP = '45.55.2.40'
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
 #MESSAGE = "Hello, World!"
