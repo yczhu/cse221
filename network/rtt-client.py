@@ -29,4 +29,3 @@ while i < numerofpackets:
 
 print "Close"
 s.close()
-
