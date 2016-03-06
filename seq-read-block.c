@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     // Non-cache set
     fcntl(fd, F_NOCACHE, 1);
 
-    total_size_mb = 1;
+    total_size_mb = atoi(argv[2]);
     total_size = total_size_mb * MEGA_BLOCKS;
     total_read = 0;
     posix_memalign((void*)&buffer, MEGA_BLOCKS, MEGA_BLOCKS);
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
             printf("Iter %d, Overhead = %" PRIu64 " cycles\n", count, end-start);
 
             count++;
-            if  (count == 100) {
+            if  (count == 20) {
                 break;
             }
 
