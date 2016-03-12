@@ -12,7 +12,7 @@
 #include <inttypes.h>
 
 #define BLOCK_SIZE 4096
-#define MEGA_BLOCKS 1024*1024
+#define KILO_BLOCKS 1024
 
 char *buffer;
 
@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
     uint64_t start, end;
     unsigned cycles_low, cycles_high, cycles_low1, cycles_high1;
 
+    unsigned long long offset;
+
     fd = open(argv[1], O_RDONLY);
     if (fd < 0) {
         perror("File open failed!\n");
@@ -34,10 +36,10 @@ int main(int argc, char** argv) {
     fcntl(fd, F_NOCACHE, 1);
 
     total_size_kb = atoi(argv[2]);
-    total_size = total_size_kb * 1024;
+    total_size = total_size_kb * KILO_BLOCKS;
     total_read = 0;
-    //posix_memalign((void*)&buffer, MEGA_BLOCKS, MEGA_BLOCKS);
     posix_memalign((void*)&buffer, BLOCK_SIZE, BLOCK_SIZE);
+    total_blocks = total_size / BLOCK_SIZE;
 
     asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
@@ -70,7 +72,12 @@ int main(int argc, char** argv) {
             "%rax", "%rbx", "%rcx", "%rdx");
     
     while(1) {
-        //val = read(fd, buffer, MEGA_BLOCKS);
+        offset = total_blocks * random() / RAND_MAX;
+        val = lseek(fd, BLOCK_SIZE * offset, SEEK_SET);
+        if (val < 0) {
+            perror("lseek error!\n");
+            exit(1);
+        }
         val = read(fd, buffer, BLOCK_SIZE);
         if (val <= 0) {
             perror("Read file failed!\n");
