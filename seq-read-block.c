@@ -88,10 +88,11 @@ int main(int argc, char** argv) {
 
             start = (((uint64_t)cycles_high << 32)| cycles_low );
             end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-            printf("Iter %d, Overhead = %" PRIu64 " cycles\n", count, end-start);
+            //printf("Iter %d, Overhead = %" PRIu64 " cycles\n", count, end-start);
+            printf("%" PRIu64 "\n",end-start);
 
             count++;
-            if  (count == 20) {
+            if  (count == 101) {
                 break;
             }
 

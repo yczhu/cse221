@@ -18,9 +18,9 @@ char *buffer;
 
 int main(int argc, char** argv) {
     int fd, val;
-    int total_size_kb;
+    int total_size_kb, total_file_size_kb;
     unsigned long long total_blocks;
-    unsigned long long total_size, total_read;
+    unsigned long long total_size, total_read, total_file_size;
 
     uint64_t start, end;
     unsigned cycles_low, cycles_high, cycles_low1, cycles_high1;
@@ -39,7 +39,9 @@ int main(int argc, char** argv) {
     total_size = total_size_kb * KILO_BLOCKS;
     total_read = 0;
     posix_memalign((void*)&buffer, BLOCK_SIZE, BLOCK_SIZE);
-    total_blocks = total_size / BLOCK_SIZE;
+    total_file_size_kb = atoi(argv[3]);
+    total_file_size = total_file_size_kb * KILO_BLOCKS;
+    total_blocks = total_file_size / BLOCK_SIZE;
 
     asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
@@ -95,10 +97,10 @@ int main(int argc, char** argv) {
 
             start = (((uint64_t)cycles_high << 32)| cycles_low );
             end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
-            printf("Iter %d, Overhead = %" PRIu64 " cycles\n", count, end-start);
+            printf("%" PRIu64 "\n", end-start);
 
             count++;
-            if  (count == 20) {
+            if  (count == 101) {
                 break;
             }
 
