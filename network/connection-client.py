@@ -28,5 +28,6 @@ while i < numerofpackets:
 print "Close"
 
 start_time = time.time()
+s.shutdown(socket.SHUT_RDWR)
 s.close()
 print "Teardown:", (time.time() - start_time) * 1000, "ms"
