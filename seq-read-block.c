@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
             printf("%" PRIu64 "\n",end-start);
 
             count++;
-            if  (count == 101) {
+            if  (count == 100) {
                 break;
             }
 
