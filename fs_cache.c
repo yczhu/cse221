@@ -10,14 +10,6 @@
 	ls -lh 1G.tmp
 */
 
-static inline unsigned long long tick() 
-{
-    unsigned a, d;
-    __asm__ __volatile__("rdtsc": "=a" (a), "=d" (d) );
-    return (((unsigned long long)a) | (((unsigned long long)d) << 32));
-}
-
-
 #define BLOCK_SIZE 4096
 
 int main(int argc, char* argv[]) {
@@ -25,7 +17,7 @@ int main(int argc, char* argv[]) {
 	/* system("sudo purge"); */
 
 	int file_size_gb; // GB
-	int loops = 1;
+	int loops = 10;
 
     if (argc <= 1) {
         exit(0);
@@ -68,16 +60,6 @@ int main(int argc, char* argv[]) {
 		}
 		total_bytes_read = 0;
 		gbCount += 1;
-
-		// while(offset < len){
-		// 	fseek(fp, -2 * BLOCK_SIZE, SEEK_CUR);
-		// 	fread(p, 1, BLOCK_SIZE, fp);
-		// 	offset += BLOCK_SIZE;
-		// }
-		// printf("%d GB read.\n", offset/(1024*1024*1024));
-		// offset = 0;
-		// gbCount += 1;
-		// fseek(fp, len, SEEK_CUR);
 	}
 	printf("%d GB read.\n", gbCount);
 

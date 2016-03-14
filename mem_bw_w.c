@@ -4,19 +4,57 @@
 #include <string.h>
 #include <inttypes.h>
 
-static inline void dummy (int d) {}
+#define BYTES_MB (1024*1024)
+#define MB 32
+#define CACHE_LINE_STRIDE 16
+#define SIZE (BYTES_MB * MB * CACHE_LINE_STRIDE)
+
+
+static inline void dummy (size_t d) {}
+
+void write_mem(size_t* array, size_t size) {
+	size_t temp = 0;
+	size_t i;
+	for (i = 0; i < size / sizeof(size_t) - 320; i += 320) {
+		array[i] = 1;
+        array[i+16] = 1;
+        array[i+32] = 1;
+        array[i+48] = 1;
+        array[i+64] = 1;
+        array[i+80] = 1;
+        array[i+96] = 1;
+        array[i+112] = 1;
+        array[i+128] = 1;
+        array[i+144] = 1;
+        array[i+160] = 1;
+        array[i+176] = 1;
+        array[i+192] = 1;
+        array[i+208] = 1;
+        array[i+224] = 1;
+        array[i+240] = 1;
+        array[i+256] = 1;
+        array[i+272] = 1;
+        array[i+288] = 1;
+        array[i+304] = 1;
+
+	}
+	dummy(temp);
+}
+
 int main(int argc, char * argv[]) {
-    
-    uint64_t start, end;
+
+	// init array
+	//size_t* array = (size_t*) malloc(SIZE * sizeof(size_t));
+	char* array;
+	posix_memalign((void*)&array, SIZE, SIZE);
+	memset(array, 0, SIZE);
+	
+	// measure time
+	uint64_t start, end;
     uint64_t times;
     unsigned cycles_low, cycles_high, cycles_low1, cycles_high1;
-    unsigned long k;
-    unsigned int arraySize = 64*1024*1024*16/sizeof(int);
-    int* array=(int *)malloc(arraySize*sizeof(int));
 
-    memset (array, 1,arraySize);
-
-    asm volatile ("CPUID\n\t"
+	asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
             "mov %%edx, %0\n\t"
             "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low)::
@@ -37,59 +75,16 @@ int main(int argc, char * argv[]) {
             "mov %%eax, %1\n\t"
             "CPUID\n\t": "=r" (cycles_high1), "=r" (cycles_low1):: "%rax",
             "%rbx", "%rcx", "%rdx");
-    int temp=0;
+
     asm volatile ("CPUID\n\t"
             "RDTSC\n\t"
             "mov %%edx, %0\n\t"
             "mov %%eax, %1\n\t": "=r" (cycles_high), "=r" (cycles_low):: 
             "%rax", "%rbx", "%rcx", "%rdx");
 
-   /* for (int i=0;i<size/2;i++){
-        temp+=array[i];
-        temp+=array[size/2+i];
-        dummy(temp);
-    }*/
-    
-    for (int i=0;i<arraySize-320;i+=320){
-        temp+=array[i]
-        // temp+=array[i+1];
-        // temp+=array[i+2];
-        // temp+=array[i+3];
-        // temp+=array[i+4];
-        // temp+=array[i+5];
-        // temp+=array[i+6]; 
-        // temp+=array[i+7];
-        // temp+=array[i+8];
-        // temp+=array[i+9];
-        // temp+=array[i+10];
-        
-        // temp+=array[i+11];
-        // temp+=array[i+12];
-        // temp+=array[i+13];
-        // temp+=array[i+14];
-        // temp+=array[i+15];
-        +array[i+16]
-        +array[i+32]
-        +array[i+48]
-        +array[i+64]
-        +array[i+80]
-        +array[i+96]
-        +array[i+112]
-        +array[i+128]
-        +array[i+144]
-        +array[i+160]
-        +array[i+176]
-        +array[i+192]
-        +array[i+208]
-        +array[i+224]
-        +array[i+240]
-        +array[i+256]
-        +array[i+272]
-        +array[i+288]
-        +array[i+304];
+    // measure time here
+    write_mem((size_t*)array, SIZE);
 
-        dummy(temp);
-    }
     asm volatile("RDTSCP\n\t"
             "mov %%edx, %0\n\t"
             "mov %%eax, %1\n\t"
@@ -99,9 +94,10 @@ int main(int argc, char * argv[]) {
     start = (((uint64_t)cycles_high << 32)| cycles_low );
     end= (((uint64_t)cycles_high1<< 32) | cycles_low1 );
     times = end - start;
-    printf("%" PRIu64 "\n",times);
-    double s=0;
-    s=times/2.2*0.000000001;
-    printf("%f MB/s\n", 64/s);
-    return 0;
+
+    double seconds = times / 2.2 * 0.000000001;
+    double speed = ( MB / seconds) / 1024.0;
+    printf("%f GB/s\n", speed);
+
+	return 0;
 }
