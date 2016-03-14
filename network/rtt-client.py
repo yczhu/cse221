@@ -23,9 +23,9 @@ while i < numerofpackets:
     start_time = time.time()
     s.send(MESSAGE)
     response = s.recv(BUFFER_SIZE)
-    #print response
-    print (time.time() - start_time) * 1000
+    end_time = time.time()
+    print (end_time - start_time) * 1000
     i = i + 1
 
-print "Close"
+#print "Close"
 s.close()
